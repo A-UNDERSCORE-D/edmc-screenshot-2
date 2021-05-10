@@ -29,12 +29,35 @@ class ScreenshotRenamer:
     }
     PADX = 10
 
+    @staticmethod
+    def config_wrapper_str(name: str, default: Optional[str]) -> str:
+        if hasattr(config, 'get_str'):
+            return config.get_str(name, default=default)
+
+        return str(config.get(name) or default)
+
+    @staticmethod
+    def config_wrapper_bool(name: str, default: Optional[bool]) -> bool:
+        if hasattr(config, 'get_bool'):
+            return config.get_bool(name, default=default)
+
+        return bool(config.get(name) or default)
+
     def __init__(self) -> None:
-        self.sshot_path = tk.StringVar(value=config.get_str(self.CONFIG_NAMES['sshot_path'], default=''))
-        self.rename_format = tk.StringVar(value=config.get_str(self.CONFIG_NAMES['format'], default=DEFAULT_FORMAT))
-        self.do_convert = tk.BooleanVar(value=config.get_bool(self.CONFIG_NAMES['convert'], default=True))
-        self.command = tk.StringVar(value=config.get_str(self.CONFIG_NAMES['command'], default=DEFAULT_COMMAND))
-        self.remove_old = tk.BooleanVar(value=config.get_bool(self.CONFIG_NAMES['remove'], default=False))
+        get_config_str = get_config_bool = config.get
+        if hasattr(config, 'get_str'):
+            get_config_str = config.get_str
+            get_config_bool = config.get_bool
+
+        self.sshot_path = tk.StringVar(value=self.config_wrapper_str(self.CONFIG_NAMES['sshot_path'], default=''))
+        self.rename_format = tk.StringVar(value=self.config_wrapper_str(
+            self.CONFIG_NAMES['format'], default=DEFAULT_FORMAT
+        ))
+        self.do_convert = tk.BooleanVar(value=self.config_wrapper_bool(self.CONFIG_NAMES['convert'], default=True))
+        self.command = tk.StringVar(value=self.config_wrapper_str(
+            self.CONFIG_NAMES['command'], default=DEFAULT_COMMAND
+        ))
+        self.remove_old = tk.BooleanVar(value=self.config_wrapper_bool(self.CONFIG_NAMES['remove'], default=False))
 
     def load(self) -> str:
         return PLUGIN_NAME
